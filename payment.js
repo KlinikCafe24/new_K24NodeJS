@@ -12,7 +12,7 @@ const options = {
         authorization: 'Basic U0ItTWlkLXNlcnZlci1MZi1OOTVNbi1TUDdLNVY2SWZtbm1ReTQ6'
     },
     data: {
-        transaction_details: { order_id: `${order}`, gross_amount: 10000 },
+        transaction_details: { order_id: `Sandbox-${order}`, gross_amount: 5000000 },
         credit_card: { secure: true }
     }
 };
@@ -21,6 +21,7 @@ axios
     .request(options)
     .then(function(response) {
         console.log(response.data);
+        console.log(`Your url for this transaction are ${response.data.redirect_url} and token are ${response.data.token}`)
     })
     .catch(function(error) {
         console.error(error);

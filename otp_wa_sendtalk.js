@@ -20,9 +20,15 @@ async function validateNumber() {
         .request(validate)
         .then(function(response) {
             if (response.data.data.is_valid == false) {
-                console.log("Nomor Wa Tidak Terdaftar")
+                console.log("Nomor Wa Tidak Terdaftar! Harap masukkan nomor Wa yang Aktif!");
             } else {
-                console.log("Nomor Wa Terdaftar")
+                console.log("Nomor Wa Terdaftar").then(function(response) {
+                    if (response.data.data.phone_number == verify) {
+                        // login
+                    } else {
+                        // verifikasi dengan mengirim OTP ke WA dan jalankan function createOTP
+                    }
+                })
             }
             console.log(response.data);
         })
