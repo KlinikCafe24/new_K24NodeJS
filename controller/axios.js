@@ -2,7 +2,7 @@ const axios = require('axios');
 const controller = {};
 
 
-controller.getAll = async function(req, res) {
+controller.getAll = function(req, res) {
     axios.get('https://y1jeig5s.directus.app/items/user_data').then(function(response) {
             res.status(200).json({
                 message: 'Data Fetched',

@@ -13,6 +13,14 @@ app.use(express.urlencoded({
     extended: true,
 }));
 
+const Connection = require('pg').Connection;
+const connection = new Connection({
+    host: "localhost",
+    user: "postgres",
+    password: "123456",
+    database: "directus_k24",
+    port: "5432"
+});
 
 // // otpGenerator.generate(6, { upperCase: false, specialChars: false });
 // // wa.create().then(client => start(client));
@@ -27,11 +35,11 @@ app.use(express.urlencoded({
 // // };
 
 
-// // app.get('/', (req, res) => {
-// //     res.sendFile('public/index.html', {
-// //         root: __dirname
-// //     })
-// // });
+// app.get('/', (req, res) => {
+//     res.sendFile('public/index.html', {
+//         root: __dirname
+//     })
+// });
 // app.post('/verifikasi', (req, res) => {
 //     var status = 0;
 //     var message = null;
@@ -82,79 +90,79 @@ app.use(express.urlencoded({
 // //         })
 // // });
 
-async function createOtp(params, callback) {
-    const otp = otpGenerator.generate(4, {
-        alphabets: false,
-        upperCase: false,
-        specialChars: false
-    });
-    const ttl = 5 * 60 * 1000;
-    const expires = Date.now() + ttl;
-    const data = `${params.phone}.${otp}.${expires}`;
-    const hash = crypto.createHmac("sha256", key).update(data).digest("hex");
-    const fullHash = `${hash}.${expires}`;
-    console.log(`Your OTP is ${otp}`);
-    return callback(null, fullHash);
-}
+// async function createOtp(params, callback) {
+//     const otp = otpGenerator.generate(4, {
+//         alphabets: false,
+//         upperCase: false,
+//         specialChars: false
+//     });
+//     const ttl = 5 * 60 * 1000;
+//     const expires = Date.now() + ttl;
+//     const data = `${params.phone}.${otp}.${expires}`;
+//     const hash = crypto.createHmac("sha256", key).update(data).digest("hex");
+//     const fullHash = `${hash}.${expires}`;
+//     console.log(`Your OTP is ${otp}`);
+//     return callback(null, fullHash);
+// }
 
-async function verifyOTP(params, callback) {
-    let [hashValue, expires] = params.hash.split('.');
-    let now = Date.now();
-    if (now > parseInt(expires)) return callback("OTP Expired");
-    let newCalculateHash = crypto.createHmac("sha256", key).update(data).digest("hex");
+// async function verifyOTP(params, callback) {
+//     let [hashValue, expires] = params.hash.split('.');
+//     let now = Date.now();
+//     if (now > parseInt(expires)) return callback("OTP Expired");
+//     let newCalculateHash = crypto.createHmac("sha256", key).update(data).digest("hex");
 
-    if (newCalculateHash === hashValue) {
-        return callback(null, "Success");
-    } else {
-        return callback("Invalid OTP")
-    }
-}
+//     if (newCalculateHash === hashValue) {
+//         return callback(null, "Success");
+//     } else {
+//         return callback("Invalid OTP")
+//     }
+// }
 
-module.export = {
-    createOtp,
-    verifyOTP,
-}
+// module.export = {
+//     createOtp,
+//     verifyOTP,
+// }
 
 server.listen(8087, () => console.log('Berhasil Masuk Server'));
 
 // Requiring module
 // const express = require("express");
-const fs = require("fs");
-var path = require('path');
+// const fs = require("fs");
+// var path = require('path');
 
-// const app = express();
+// // const app = express();
 
-function authentication(req, res, next) {
-    var authheader = req.headers.authorization;
-    console.log(req.headers);
+// function authentication(req, res, next) {
+//     var authheader = req.headers.authorization;
+//     console.log(req.headers);
 
-    if (!authheader) {
-        var err = new Error('You are not authenticated!');
-        res.setHeader('WWW-Authenticate', 'Basic');
-        err.status = 401;
-        return next(err)
-    }
+//     if (!authheader) {
+//         var err = new Error('You are not authenticated!');
+//         res.setHeader('WWW-Authenticate', 'Basic');
+//         err.status = 401;
+//         return next(err)
+//     }
 
-    var auth = new Buffer.from(authheader.split(' ')[1],
-        'base64').toString().split(':');
-    var user = auth[0];
-    var pass = auth[1];
+//     var auth = new Buffer.from(authheader.split(' ')[1],
+//         'base64').toString().split(':');
+//     var user = auth[0];
+//     var pass = auth[1];
 
-    if (user == 'admin' && pass == 'password') {
-        // If Authorized user
-        next();
-    } else {
-        var err = new Error('You are not authenticated!');
-        res.setHeader('WWW-Authenticate', 'Basic');
-        err.status = 401;
-        return next(err);
-    }
+//     if (user == 'admin' && pass == 'password') {
+//         // If Authorized user
+//         next();
+//     } else {
+//         var err = new Error('You are not authenticated!');
+//         res.setHeader('WWW-Authenticate', 'Basic');
+//         err.status = 401;
+//         return next(err);
+//     }
 
-}
+// }
 
-// First step is the authentication of the client
-app.use(authentication)
-app.use(express.static(path.join(__dirname, 'public')));
+// // First step is the authentication of the client
+// app.use(authentication)
+// app.use(express.static(path.join(__dirname, 'public')));
 
 // // Server setup
 // app.listen((8087), () => {
