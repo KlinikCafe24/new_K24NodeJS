@@ -189,7 +189,7 @@ function paymentMandiri() {
         });;
 };
 
-module.export = {
+module.exports = {
     paymentPermata,
     paymentBri,
     paymentBca,

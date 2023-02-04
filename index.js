@@ -1,10 +1,18 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const sequelize = require("sequelize");
 const app = express();
 const port = 3000;
 const db = require('./queries');
+const path = require('path')
+const cors = require('cors')
+const Rajaongkir_apiRouter = require('./routes/rajaongkir_api')
+const Midtrans_apiRouter = require('./routes/midtrans_api')
+    // import pool from "../K24/queries";
 
+app.use(cors())
+app.use(express.json())
+app.use(express.urlencoded({ extended: false }))
+app.use(express.static(path.join(__dirname, 'public')))
 app.use(bodyParser.json());
 app.use(
     bodyParser.urlencoded({
@@ -12,7 +20,7 @@ app.use(
     })
 )
 
-const Pool = require("pg").Pool;
+const { Pool } = require("pg")
 const pool = new Pool({
     user: 'postgres',
     host: 'localhost',
@@ -21,25 +29,22 @@ const pool = new Pool({
     port: 5432
 });
 
-// app.get("/Product", db.getProduct);
-// app.get("/Product/:id", db.getProductById);
-// app.put("/Product/:id", db.updateProduct);
-// app.post("/Product", db.createProduct);
-// app.delete("/Product/:id", db.deleteProduct);
+pool.connect((err) => {
+    if (err) throw err;
+    console.log('Postgre Connected...');
+});
+
+
 app.listen(port, () => {
     console.log("Server is running on " + port);
 });
 
-app.get("/", (request, response) => {
-    response.json({
-        info: 'Hello world!'
-    });
-})
 
-app.get('/api/products', (req, res) => {
-    let post = "SELECT * FROM Product";
-    let query = pool.query(post, (err, results) => {
-        if (err) throw err;
-        res.send(JSON.stringify({ "status": 200, "error": null, "response": results }));
-    });
-});
+app.get("/Product", db.getProduct);
+// app.get("/Product/:id", db.getProductById);
+// app.put("/Product/:id", db.updateProduct);
+// app.post("/Product", db.createProduct);
+// app.delete("/Product/:id", db.deleteProduct);
+
+app.use('/rajaongkir_api', Rajaongkir_apiRouter);
+app.use('/midtrans_api', Midtrans_apiRouter);

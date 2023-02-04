@@ -1,58 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<!-- Bootstrap CSS-->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet" media="all">
-
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OTP Whatsapp</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ongkir</title>
+  <link rel="stylesheet" href="/css/style.css">
 </head>
-
-<body>
-    <div class="col-6">
-        <div class="form-group">
-            <label for="phone" class="control-label mb-1">Phone</label>
-            <input id="phone" name="phone" type="text">
-        </div>
-        <div>
-            <button id="send_btn" type="submit" class="btn btn-lg btn-info btn-block">
-                <i class="fa fa-save"></i>&nbsp;
-                Kirim
-            </button>
-        </div>
-    </div>
+<body onload="loadProvinsi()">
+  <h2>Implementasi API RajaOngkir dengan<br>NodeJS + Express</h2>
+  <table cellpadding="5" border="1" style="border-collapse: collapse;">
+    <tr><td colspan="2" style="text-align: center"><b>ASAL PAKET</b></td></tr>
+    <tr>
+      <td>Provinsi Asal</td>
+      <td>
+        <select id="prov1" onchange="loadKota(this.value, 'kot1')">
+          <option value="" selected="" disabled="">-- Pilih Provinsi --</option>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>Kota Asal</td>
+      <td>
+        <select id="kot1">
+          <option value="" selected="" disabled="">-- Pilih Kota --</option>
+        </select>
+      </td>
+    </tr>
+    <tr><td colspan="2" style="text-align: center"><b>TUJUAN PAKET</b></td></tr>
+    <tr>
+      <td>Provinsi Tujuan</td>
+      <td>
+        <select id="prov2" onchange="loadKota(this.value, 'kot2')">
+          <option value="" selected="" disabled="">-- Pilih Provinsi --</option>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>Kota Tujuan</td>
+      <td>
+        <select id="kot2">
+          <option value="" selected="" disabled="">-- Pilih Kota --</option>
+        </select>
+      </td>
+    </tr>
+    <tr><td colspan="2" style="text-align: center"><b>CEK ONGKOS</b></td></tr>
+    <tr>
+      <td>Berat Paket (gram)</td>
+      <td><input type="number" id="berat" min="1000" step="100" value="1000"></td>
+    </tr>
+    <tr>
+      <td>Kurir</td>
+      <td>
+        <select id="kurir">
+          <option value="" selected="" disabled="">-- Pilih Kurir --</option>
+          <option value="jne">JNE</option>
+          <option value="pos">POS Indonesia</option>
+          <option value="tiki">TIKI</option>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td></td>
+      <td><button onclick="cekOngkir()">Cek Ongkir</button></td>
+    </tr>
+  </table>
+  <br>
+  <div id="hasil"></div>
+  <script src="/js/script.js"></script>
 </body>
-
-<!-- Jquery JS-->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<!-- Bootstrap JS-->
-<script src="assets/vendor/bootstrap-4.1/popper.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"></script>
-<script type="text/javascript">
-    $('body').on('click', '#send_btn', function() {
-        var phone = $('#phone').val();
-        $.ajax({
-            url: 'http://localhost:8087/verifikasi',
-            type: 'post',
-            dataType: 'json',
-            data: {
-                phone: phone
-            },
-            success: function(response) {
-                if (response.status == 1) {
-                    alert(response.message);
-                } else {
-                    alert(response.message);
-                }
-            },
-            error: function(err) {
-                alert('Ada error ' + err);
-            }
-        })
-    })
-</script>
-
 </html>

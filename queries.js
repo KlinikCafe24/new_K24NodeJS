@@ -1,16 +1,8 @@
-const Pool = require("pg").Pool;
-const pool = new Pool({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'directus_k24',
-    password: '123456',
-    port: 5432
-});
-const ResponseClass = require("./model/response") // opsional
+const axios = require('axios')
 
 const getProduct = (request, response) => {
-    var responseReturn = new ResponseClass();
-    pool.query('http://localhost:8055/items/Product', (error, results) => {
+    const responseReturn = new ResponseClass();
+    pool.query('SELECT * FROM Product', (error, results) => {
         if (error) {
             throw error
         }
@@ -18,10 +10,23 @@ const getProduct = (request, response) => {
         responseReturn.code = 200;
         responseReturn.message = "Success";
         responseReturn.data = results.rows;
-
         response.status(200).json(responseReturn);
     })
 }
+// const config = { Authorization: "Bearer 6xi90t_us68NBlzdVRmjsWPaCqwCtBe1" }
+// const getProduct = (req, res) => {
+//     axios.get('http://localhost:8055/items/Product', { config }).then(function(response) {
+//             res.status(200).json({
+//                 status: 1,
+//                 data: response.data
+//             })
+//         })
+//         .catch(function(error) {
+//             res.status(404).json({
+//                 message: error.message
+//             })
+//         })
+// };
 
 // const getProductById = (request, response) => {
 //     var responseReturn = new ResponseClass();
