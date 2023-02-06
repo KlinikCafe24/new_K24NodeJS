@@ -1,4 +1,5 @@
 const { v4: uuidv4 } = require('uuid')
+const midtransClient = require('midtrans-client')
 
 let snap = new midtransClient.Snap({
     isProduction: false,
