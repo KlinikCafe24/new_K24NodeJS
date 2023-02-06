@@ -7,6 +7,7 @@ const path = require('path')
 const cors = require('cors')
 const Rajaongkir_apiRouter = require('./routes/rajaongkir_api')
 const Midtrans_apiRouter = require('./routes/midtrans_api')
+const Sendtalk_apiRouter = require('./routes/sendtalk_api')
     // import pool from "../K24/queries";
 
 app.use(cors())
@@ -40,11 +41,12 @@ app.listen(port, () => {
 });
 
 
-app.get("/Product", db.getProduct);
-// app.get("/Product/:id", db.getProductById);
-// app.put("/Product/:id", db.updateProduct);
-// app.post("/Product", db.createProduct);
-// app.delete("/Product/:id", db.deleteProduct);
+app.get("/User", db.getUser);
+app.get("/User/:id", db.getUserById);
+// app.put("/User/:id", db.updateUser);
+app.post("/User", db.addUser);
+// app.delete("/User/:id", db.deleteUser);
 
 app.use('/rajaongkir_api', Rajaongkir_apiRouter);
 app.use('/midtrans_api', Midtrans_apiRouter);
+app.use('/sendtalk_api', Sendtalk_apiRouter);

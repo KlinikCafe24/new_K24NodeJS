@@ -1,54 +1,68 @@
 const axios = require('axios')
 
-const getProduct = (request, response) => {
-    const responseReturn = new ResponseClass();
-    pool.query('SELECT * FROM Product', (error, results) => {
-        if (error) {
-            throw error
-        }
-        responseReturn.status = true;
-        responseReturn.code = 200;
-        responseReturn.message = "Success";
-        responseReturn.data = results.rows;
-        response.status(200).json(responseReturn);
-    })
-}
-// const config = { Authorization: "Bearer 6xi90t_us68NBlzdVRmjsWPaCqwCtBe1" }
-// const getProduct = (req, res) => {
-//     axios.get('http://localhost:8055/items/Product', { config }).then(function(response) {
-//             res.status(200).json({
-//                 status: 1,
-//                 data: response.data
-//             })
-//         })
-//         .catch(function(error) {
-//             res.status(404).json({
-//                 message: error.message
-//             })
-//         })
-// };
-
-// const getProductById = (request, response) => {
-//     var responseReturn = new ResponseClass();
-//     const id = parseInt(request.params.id)
-//     pool.query('SELECT * FROM Product WHERE id = $1', [id], (error, results) => {
+// const getProduct = (request, response) => {
+//     const responseReturn = new ResponseClass();
+//     pool.query('SELECT * FROM Product', (error, results) => {
 //         if (error) {
 //             throw error
 //         }
-//         if (results.rowCount == 0) {
-//             responseReturn.status = true;
-//             responseReturn.code = 404;
-//             responseReturn.message = "User not found";
-//             responseReturn.data = null;
-//         } else {
-//             responseReturn.status = true;
-//             responseReturn.code = 200;
-//             responseReturn.message = "Success";
-//             responseReturn.data = results.rows[0];
-//         }
+//         responseReturn.status = true;
+//         responseReturn.code = 200;
+//         responseReturn.message = "Success";
+//         responseReturn.data = results.rows;
 //         response.status(200).json(responseReturn);
 //     })
 // }
+const config = { Authorization: "Bearer 6xi90t_us68NBlzdVRmjsWPaCqwCtBe1" }
+const getUser = (req, res) => {
+    axios.get('https://y1jeig5s.directus.app/items/user_data', { config }).then(function(response) {
+            res.status(200).json({
+                status: 1,
+                data: response.data
+            })
+        })
+        .catch(function(error) {
+            res.status(404).json({
+                message: error.message
+            })
+        })
+};
+
+
+const getUserById = (req, res) => {
+    const id = parseInt(req.params.id);
+    axios.get('https://y1jeig5s.directus.app/items/user_data', $id = { id }, { config }).then(function(response) {
+            res.status(200).json({
+                status: 1,
+                data: response.data
+            })
+        })
+        .catch(function(error) {
+            res.status(404).json({
+                message: error.message
+            })
+        })
+}
+
+const addUser = (req, res) => {
+    const user = req.body
+    axios.post('https://y1jeig5s.directus.app/items/user_data', {
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+            password: user.password
+        }, { config }).then(function(response) {
+            res.status(200).json({
+                status: 1,
+                data: response.data
+            })
+        })
+        .catch(function(error) {
+            res.status(404).json({
+                message: error.message
+            })
+        })
+};
 
 // const createProduct = (request, response) => {
 //     const { firstname, lastname, origin } = request.body;
@@ -97,9 +111,9 @@ const getProduct = (request, response) => {
 
 
 module.exports = {
-    getProduct,
-    // getProductById,
-    // createProduct,
+    getUser,
+    getUserById,
+    addUser,
     // updateProduct,
     // deleteProduct
 }

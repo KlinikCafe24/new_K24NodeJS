@@ -4,6 +4,7 @@ const axios = require('axios')
 const { v4: uuidv4 } = require('uuid')
 
 router.post('/snap_transaction', (req, res) => {
+    const amount = req.body
     const transaction = {
         method: 'POST',
         url: 'https://app.sandbox.midtrans.com/snap/v1/transactions',
@@ -13,7 +14,7 @@ router.post('/snap_transaction', (req, res) => {
             authorization: 'Basic U0ItTWlkLXNlcnZlci1MZi1OOTVNbi1TUDdLNVY2SWZtbm1ReTQ6'
         },
         data: {
-            transaction_details: { order_id: uuidv4(), gross_amount: 10000 },
+            transaction_details: { order_id: uuidv4(), gross_amount: amount.gross_amount },
             enabled_payments: [
                 "gopay",
                 "indomaret",
