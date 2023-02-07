@@ -15,15 +15,47 @@ router.post('/snap_transaction', (req, res) => {
         },
         data: {
             transaction_details: { order_id: uuidv4(), gross_amount: amount.gross_amount },
+            credit_card: {
+                "secure": true,
+                "bank": "bca",
+                "installment": {
+                    "required": false,
+                    "terms": {
+                        "bni": [3, 6, 12],
+                        "mandiri": [3, 6, 12],
+                        "cimb": [3],
+                        "bca": [3, 6, 12],
+                        "offline": [6, 12]
+                    }
+                },
+                "whitelist_bins": [
+                    "48111111",
+                    "41111111"
+                ]
+            },
             enabled_payments: [
+                "credit_card",
+                "mandiri_clickpay",
+                "cimb_clicks",
+                "bca_klikbca",
+                "bca_klikpay",
+                "bri_epay",
+                "echannel",
+                "indosat_dompetku",
+                "mandiri_ecash",
+                "permata_va",
+                "bca_va",
+                "bni_va",
+                "other_va",
                 "gopay",
+                "kioson",
                 "indomaret",
-                "danamon_online",
-                "akulaku",
-                "shopeepay",
-                "kredivo",
-                "uob_ezpay"
-            ]
+                "gci",
+                "danamon_online"
+            ],
+            callbacks: {
+                "finish": "https://demo.midtrans.com"
+            },
         }
     };
     axios

@@ -56,11 +56,13 @@ const addUser = (req, res) => {
                 status: 1,
                 data: response.data
             })
+            res.json(response.data)
         })
         .catch(function(error) {
             res.status(404).json({
                 message: error.message
             })
+            res.send(error)
         })
 };
 
