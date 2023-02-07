@@ -327,4 +327,83 @@ router.get('/get_areasBySuburbsID/:suburb_id', (req, res) => {
         });
 });
 
+router.get('/get_active_logistic', (req, res) => {
+    const status = {
+        method: 'GET',
+        url: 'https://merchant-api-sandbox.shipper.id/v3/logistic',
+        headers: {
+            accept: 'application/json',
+            'X-API-Key': 'QF22PVYG9RodVcDDFpaydXo8isGtd0TERtBPztxiQq1cODbypQuKszCE2361HPLT'
+        }
+    };
+    axios
+        .request(status)
+        .then(function(response) {
+            ddw
+            console.log(response.data);
+            res.json(response.data)
+        })
+        .catch(function(error) {
+            console.error(error);
+            res.send(error)
+        });
+});
+
+router.post('/create_order', (req, res) => {
+    const order = req.body
+    const status = {
+        method: 'GET',
+        url: 'https://merchant-api-sandbox.shipper.id/v3/order',
+        headers: {
+            accept: 'application/json',
+            'X-API-Key': 'QF22PVYG9RodVcDDFpaydXo8isGtd0TERtBPztxiQq1cODbypQuKszCE2361HPLT'
+        },
+        data: {
+            consignee: {
+                name: order.name,
+                phone_number: order.phone_number
+            },
+            consigner: {
+                name: order.name,
+                phone_number: order.phone_number
+            },
+            courier: {
+                rate_id: order.rate_id
+            },
+            coverage: order.coverage,
+            destination: {
+                address: order.address,
+                area_id: order.area_id
+            },
+            origin: {
+                address: order.address,
+                area_id: order.area_id
+            },
+            package: {
+                height: order.height,
+                items: {
+                    name: order.name,
+                    price: order.price,
+                    qty: order.qty
+                },
+                length: order.length,
+                weight: order.weight,
+                width: order.width
+            },
+            payment_type: order.payment_type
+        }
+    };
+    axios
+        .request(status)
+        .then(function(response) {
+            ddw
+            console.log(response.data);
+            res.json(response.data)
+        })
+        .catch(function(error) {
+            console.error(error);
+            res.send(error)
+        });
+});
+
 module.exports = router
