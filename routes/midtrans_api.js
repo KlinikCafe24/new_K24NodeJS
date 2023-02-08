@@ -54,7 +54,7 @@ router.post('/snap_transaction', (req, res) => {
                 "danamon_online"
             ],
             callbacks: {
-                "finish": "https://demo.midtrans.com"
+                "finish": "https://klinikcafe24.com"
             },
         }
     };
