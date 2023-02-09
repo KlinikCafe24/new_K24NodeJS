@@ -19,13 +19,8 @@ const authLogin = () => {
                 const username = req.body.usernames;
                 const password = crypto.createHmac("sha256", req.body.passwords).digest("hex");
                 if (username === element.username && password === element.password) {
-
-                    const data = {
-                        username: username,
-                        password: password
-                    }
-                    
                     req.session.id = element.id;
+                    req.session.username = element.username.
                     res.redirect('/home');
                 } else {
                     res.send('Bad user/pass');
