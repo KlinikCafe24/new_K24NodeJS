@@ -1,6 +1,5 @@
 {
     "dependencies": {
-        "@open-wa/wa-automate": "^2.0.15",
         "api": "^5.0.6",
         "auth": "^0.0.1",
         "axios": "^1.2.3",
@@ -19,10 +18,9 @@
         "node-fetch": "^2.6.8",
         "otp-generator": "^4.0.0",
         "pg": "^8.8.0",
-        "postgresql": "^0.0.1",
+        "pnpm": "^7.27.0",
         "sequelize": "^6.28.0",
         "twilio": "^4.7.1",
-        "unless": "^0.1.1",
         "uuid": "^9.0.0",
         "whatsapp-web.js": "^1.19.2",
         "xendit-node": "^1.21.10"

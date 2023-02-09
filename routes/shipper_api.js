@@ -485,7 +485,6 @@ router.get('/get_orderStatus/:status_id', (req, res) => {
 });
 
 router.get('/get_availableOrder/', (req, res) => {
-    const avail = req.params
     const status = {
         method: 'GET',
         url: 'https://merchant-api-sandbox.shipper.id/v3/order',

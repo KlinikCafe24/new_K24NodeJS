@@ -4,6 +4,7 @@ const app = express();
 const port = 3000;
 const db = require('./queries');
 const path = require('path')
+const crypto = require('crypto');
 const cors = require('cors')
 const Shipper_apiRouter = require('./routes/shipper_api')
 const Midtrans_apiRouter = require('./routes/midtrans_api')
@@ -38,6 +39,47 @@ pool.connect((err) => {
 
 app.listen(port, () => {
     console.log("Server is running on " + port);
+});
+
+
+
+// app.post('/auth', function(req, res) {
+
+
+
+
+//     if (username && password) {
+
+
+
+
+//     }
+// });
+
+
+
+
+
+function checkAuth(req, res, next) {
+    if (!req.session.id) {
+        res.send('You are not authorized to view this page');
+    } else {
+        next();
+    }
+}
+
+
+
+app.post('/auth', db.authLogin);
+
+app.get('/home', checkAuth, function(req, res) {
+    res.send('if you are viewing this page it means you are logged in');
+});
+
+
+app.get('/logout', function(req, res) {
+    delete req.session.id;
+    res.redirect('/login');
 });
 
 

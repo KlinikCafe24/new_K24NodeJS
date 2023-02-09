@@ -1,5 +1,37 @@
 const axios = require('axios')
 
+
+const { Pool } = require("pg")
+const pool = new Pool({
+    user: 'postgres',
+    host: 'localhost',
+    database: 'directus_k24',
+    password: '123456',
+    port: 5432
+});
+
+
+function authLogin() {
+    const query = `SELECT * FROM directus_users`;
+    pool.connect((err) => {
+        pool.query(query, (err, req, res) => {
+            const username = req.body.usernames;
+            const password = crypto.createHmac("sha256", req.body.passwords).digest("hex");
+
+            if (username === element.username && password === element.password) {
+                const data = {
+                    username: username,
+                    password: password
+                }
+                req.session.id = element.id;
+                res.redirect('/home');
+            } else {
+                res.send('Bad user/pass');
+            }
+        });
+    })
+}
+
 // const getProduct = (request, response) => {
 //     const responseReturn = new ResponseClass();
 //     pool.query('SELECT * FROM Product', (error, results) => {
@@ -13,6 +45,9 @@ const axios = require('axios')
 //         response.status(200).json(responseReturn);
 //     })
 // }
+
+
+
 const config = { Authorization: "Bearer 6xi90t_us68NBlzdVRmjsWPaCqwCtBe1" }
 const getUser = (req, res) => {
     axios.get('https://y1jeig5s.directus.app/items/user_data', { config }).then(function(response) {
@@ -116,6 +151,7 @@ module.exports = {
     getUser,
     getUserById,
     addUser,
+    authLogin,
     // updateProduct,
     // deleteProduct
 }
