@@ -15,19 +15,22 @@ function authLogin() {
     const query = `SELECT * FROM directus_users`;
     pool.connect((err) => {
         pool.query(query, (err, req, res) => {
-            const username = req.body.usernames;
-            const password = crypto.createHmac("sha256", req.body.passwords).digest("hex");
+            res.rows.forEach(element => {
+                const username = req.body.usernames;
+                const password = crypto.createHmac("sha256", req.body.passwords).digest("hex");
+                if (username === element.username && password === element.password) {
 
-            if (username === element.username && password === element.password) {
-                const data = {
-                    username: username,
-                    password: password
+                    const data = {
+                        username: username,
+                        password: password
+                    }
+                    
+                    req.session.id = element.id;
+                    res.redirect('/home');
+                } else {
+                    res.send('Bad user/pass');
                 }
-                req.session.id = element.id;
-                res.redirect('/home');
-            } else {
-                res.send('Bad user/pass');
-            }
+            });
         });
     })
 }
