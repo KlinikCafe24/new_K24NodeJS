@@ -1,34 +1,14 @@
 const axios = require('axios')
-
+const crypto = require('crypto')
 
 const { Pool } = require("pg")
 const pool = new Pool({
     user: 'postgres',
     host: 'localhost',
     database: 'directus_k24',
-    password: '123456',
-    port: 5432
+    password: 'root',
+    port: 5433
 });
-
-
-const authLogin = () => {
-    const query = `SELECT * FROM directus_users`;
-    pool.connect((err) => {
-        pool.query(query, (err, req, res) => {
-            res.rows.forEach(element => {
-                const username = req.body.usernames;
-                const password = crypto.createHmac("sha256", req.body.passwords).digest("hex");
-                if (username === element.username && password === element.password) {
-                    req.session.id = element.id;
-                    req.session.username = element.username.
-                    res.redirect('/home');
-                } else {
-                    res.send('Bad user/pass');
-                }
-            });
-        });
-    })
-}
 
 // const getProduct = (request, response) => {
 //     const responseReturn = new ResponseClass();
@@ -43,6 +23,48 @@ const authLogin = () => {
 //         response.status(200).json(responseReturn);
 //     })
 // }
+
+const query = `SELECT * FROM public.directus_users`;
+const authLogin = (req, res) => {
+    const username = req.body.username;
+    const password = crypto.createHmac("sha256", req.body.password).digest("hex");
+    if(username && password)
+    {
+        pool.connect((err) => {
+            if(err) throw err;
+            pool.query(query, (req, res) => {
+                if(res)
+                {
+                    res.rows.forEach((element, req) => {
+                        if (username === element.username && password === element.password) {
+                            req.session.id = element.id;
+                            req.session.username = element.username;
+                        } 
+
+                    });
+                }
+                else{
+                    console.log("No Response Data not Found");
+                }
+            });
+        })
+    }
+    else{
+        return res
+            .status(401)
+            .send({message : "Username or Password Null"})
+    }
+}
+
+
+
+const checkAuth = (req, res, next) =>  {
+    if (!req.session.id) {
+        res.send('You are not authorized to view this page');
+    } else {
+        next();
+    }
+}
 
 
 
@@ -99,6 +121,9 @@ const addUser = (req, res) => {
         })
 };
 
+
+
+
 // const createProduct = (request, response) => {
 //     const { firstname, lastname, origin } = request.body;
 //     pool.query('INSERT INTO Product (firstname, lastname, origin) VALUES ($1, $2, $3)', [firstname, lastname, origin], (error, results) => {
@@ -150,6 +175,7 @@ module.exports = {
     getUserById,
     addUser,
     authLogin,
+    checkAuth
     // updateProduct,
     // deleteProduct
 }

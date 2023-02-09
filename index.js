@@ -27,8 +27,8 @@ const pool = new Pool({
     user: 'postgres',
     host: 'localhost',
     database: 'directus_k24',
-    password: '123456',
-    port: 5432
+    password: 'root',
+    port: 5433
 });
 
 pool.connect((err) => {
@@ -42,19 +42,12 @@ app.listen(port, () => {
 });
 
 
-function checkAuth(req, res, next) {
-    if (!req.session.id) {
-        res.send('You are not authorized to view this page');
-    } else {
-        next();
-    }
-}
 
 
 
 app.post('/auth', db.authLogin);
 
-app.get('/home', checkAuth, function(req, res) {
+app.get('/home', db.checkAuth, function(req, res) {
     res.send('if you are viewing this page it means you are logged in');
 });
 
