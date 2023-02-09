@@ -42,24 +42,6 @@ app.listen(port, () => {
 });
 
 
-
-// app.post('/auth', function(req, res) {
-
-
-
-
-//     if (username && password) {
-
-
-
-
-//     }
-// });
-
-
-
-
-
 function checkAuth(req, res, next) {
     if (!req.session.id) {
         res.send('You are not authorized to view this page');
