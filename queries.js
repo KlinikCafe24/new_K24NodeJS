@@ -11,7 +11,7 @@ const pool = new Pool({
 });
 
 
-function authLogin() {
+const authLogin = () => {
     const query = `SELECT * FROM directus_users`;
     pool.connect((err) => {
         pool.query(query, (err, req, res) => {
