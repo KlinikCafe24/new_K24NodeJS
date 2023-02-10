@@ -22,7 +22,10 @@ app.use(
     })
 )
 
-const { Pool } = require("pg")
+const { Pool } = require("pg");
+const { log } = require("console");
+const { json } = require("body-parser");
+const { response } = require("express");
 const pool = new Pool({
     user: 'postgres',
     host: 'localhost',
@@ -45,7 +48,33 @@ app.listen(port, () => {
 
 
 
-app.post('/auth', db.authLogin);
+app.post('/auth', express.urlencoded({extended: false}), (req, res) => {
+    const username = req.body.username;
+    const password = crypto.createHmac("sha256", req.body.password).digest("hex");
+
+    let User = {
+        username : username,
+        password : password
+    }
+
+    pool.query(`SELECT * FROM public.directus_users`, (err, res) => {
+
+        User.username = res.rows[0].username;
+        User.password = res.rows[0].password;
+
+        if(username == User.username && password == User.password)
+        {
+            req.session.username = username;
+            console.log("Login Successfull, Welcome" + username + {data : User});
+            return response.send({data : User}).status(200);
+
+        }
+        else{
+            console.log("Username or Password its Wrong");
+        }
+    });
+
+});
 
 app.get('/home', db.checkAuth, function(req, res) {
     res.send('if you are viewing this page it means you are logged in');
