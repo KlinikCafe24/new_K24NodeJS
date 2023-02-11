@@ -44,12 +44,12 @@ app.listen(port, () => {
     console.log("Server is running on " + port);
 });
 
-
-
-
-
 app.post('/signup', db.signup)
 app.post('/signin', db.signin)
+
+app.use('/shipper_api', Shipper_apiRouter);
+app.use('/midtrans_api', Midtrans_apiRouter);
+app.use('/sendtalk_api', Sendtalk_apiRouter);
 
 // app.post('/auth', express.urlencoded({ extended: false }), (req, res) => {
 //     const username = req.body.username;
@@ -98,7 +98,3 @@ app.post('/signin', db.signin)
 // // app.put("/User/:id", db.updateUser);
 // app.post("/User", db.addUser);
 // app.delete("/User/:id", db.deleteUser);
-
-app.use('/shipper_api', Shipper_apiRouter);
-app.use('/midtrans_api', Midtrans_apiRouter);
-app.use('/sendtalk_api', Sendtalk_apiRouter);

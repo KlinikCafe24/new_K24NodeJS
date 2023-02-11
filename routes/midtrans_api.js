@@ -72,9 +72,10 @@ router.post('/snap_transaction', (req, res) => {
 
 
 router.get('/transaction_status', (req, res) => {
+    const order = req.body
     const status = {
         method: 'GET',
-        url: 'https://api.sandbox.midtrans.com/v2/1/status',
+        url: 'https://api.sandbox.midtrans.com/v2/' + order.order_id + '/status',
         headers: {
             accept: 'application/json',
             authorization: 'Basic U0ItTWlkLXNlcnZlci1MZi1OOTVNbi1TUDdLNVY2SWZtbm1ReTQ6'

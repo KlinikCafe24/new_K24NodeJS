@@ -50,7 +50,7 @@ const createUser = (user) => {
     const id = crypto.randomUUID();
     console.log(id);
     return database.raw(
-            "INSERT INTO directus_users(id,username, password_digest, token) VALUES (?, ?, ?, ?) RETURNING id, username, token", [id, user.username, user.password_digest, user.token]
+            "INSERT INTO directus_users(id,username,email, password_digest, token) VALUES (?, ?, ?, ?, ?) RETURNING id, username, token", [id, user.username, user.email, user.password_digest, user.token]
         )
         .then((data) => data.rows[0])
 }
@@ -102,6 +102,11 @@ const findUser = (userReq) => {
 
 const findEmail = (userReq) => {
     return database.raw("SELECT * FROM directus_users WHERE email = ?", [userReq.email])
+        .then((data) => data.rows[0])
+}
+
+const findPhone = (userReq) => {
+    return database.raw("SELECT * FROM directus_users WHERE phone = ?", [userReq.phone_number])
         .then((data) => data.rows[0])
 }
 
@@ -157,6 +162,9 @@ module.exports = {
     signup,
     signin,
     userPhotos,
+    authenticate,
+    findByToken,
+    findPhone
     // updateProduct,
     // deleteProduct
 }
