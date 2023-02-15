@@ -1,25 +1,8 @@
-const axios = require('axios')
 const crypto = require('crypto')
 const bcrypt = require('bcrypt')
-const { Pool } = require("pg")
 const environment = process.env.NODE_ENV || 'development';
 const configuration = require('./knex')[environment];
 const database = require('knex')(configuration);
-const pool = new Pool({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'directus_k24',
-    password: '123456',
-    port: 5432
-});
-
-const checkAuth = (req, res, next) => {
-    if (!req.session.id) {
-        res.send('You are not authorized to view this page');
-    } else {
-        next();
-    }
-}
 
 const signup = (request, response) => {
     const user = request.body
@@ -50,7 +33,7 @@ const createUser = (user) => {
     const id = crypto.randomUUID();
     console.log(id);
     return database.raw(
-            "INSERT INTO directus_users(id,username,email, password_digest, token) VALUES (?, ?, ?, ?, ?) RETURNING id, username, token", [id, user.username, user.email, user.password_digest, user.token]
+            "INSERT INTO directus_users(id,username,email,phone ,password_digest, token) VALUES (?, ?, ?, ?, ?) RETURNING id, username, token", [id, user.username, user.email, user.phone, user.password_digest, user.token]
         )
         .then((data) => data.rows[0])
 }
@@ -299,5 +282,13 @@ module.exports = {
 //         return res
 //             .status(401)
 //             .send({message : "Username or Password Null"})
+//     }
+// }
+
+// const checkAuth = (req, res, next) => {
+//     if (!req.session.id) {
+//         res.send('You are not authorized to view this page');
+//     } else {
+//         next();
 //     }
 // }

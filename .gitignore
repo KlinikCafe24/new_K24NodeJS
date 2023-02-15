@@ -4,4 +4,5 @@ node_modules
 **.data.json
 **.node-persist**
 **_IGNORE_**
+**server.js**
 # end managed

@@ -20,6 +20,7 @@
         "otp-generator": "^4.0.0",
         "pg": "^8.8.0",
         "pnpm": "^7.27.0",
+        "request": "^2.88.2",
         "sequelize": "^6.28.0",
         "twilio": "^4.7.1",
         "uuid": "^9.0.0",
@@ -27,7 +28,7 @@
         "xendit-node": "^1.21.10"
     },
     "scripts": {
-        "start": "node index.js"
+        "start": "node server.js"
     },
     "name": "k24",
     "version": "1.0.0",

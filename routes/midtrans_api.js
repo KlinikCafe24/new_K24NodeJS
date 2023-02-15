@@ -120,3 +120,7 @@ module.exports = router
 //         .then(response => res.json(response.data))
 //         .catch(err => res.send(err))
 // })
+
+// let getCurrentTimestamp = () => {
+//     return "" + Math.round(new Date().getTime() / 1000);
+//   };

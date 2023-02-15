@@ -30,7 +30,7 @@ router.post('/validate_whatsapp', (req, res) => {
                 db.findByToken();
                 db.authenticate() = findNumber;
                 if (findNumber == phone_status.true) {
-                    signin();
+                    db.signin();
                     console.log("Login Berhasil");
                 } else {
                     console.log("Gagal Login");
