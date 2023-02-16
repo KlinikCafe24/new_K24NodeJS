@@ -79,7 +79,7 @@ router.get('/kecamatan/:city', (req, res) => {
 
 router.post('/ongkos', (req, res) => {
     const price = req.body
-    const subdistrict = {
+    const total = {
         method: 'POST',
         url: 'https://pro.rajaongkir.com/api/cost',
         headers: {
@@ -95,8 +95,29 @@ router.post('/ongkos', (req, res) => {
             courier: price.courier
         }
     };
+    request(total, function(error, response, body) {
+        if (error) throw new Error(error);
+
+        console.log(body);
+        res.json(response.body)
+    });
+})
+
+router.get('/internasionalOrigin', (req, res) => {
+    const origin = req.body
+    const international = {
+        method: 'GET',
+        url: 'https://pro.rajaongkir.com/api/v2/internationalOrigin',
+        headers: {
+            key: 'b4f5bd013cd49cab7d2d46f815bd07a9'
+        },
+        form: {
+            id: origin.id,
+            province: origin.province
+        }
+    };
     axios
-        .request(subdistrict)
+        .request(international)
         .then(function(response) {
             console.log(response.data);
             res.json(response.data)
@@ -107,5 +128,94 @@ router.post('/ongkos', (req, res) => {
         });
 })
 
+router.get('/internasionalDestination', (req, res) => {
+    const destination = req.body
+    const international = {
+        method: 'GET',
+        url: 'https://pro.rajaongkir.com/api/v2/internationalDestination',
+        headers: {
+            key: 'b4f5bd013cd49cab7d2d46f815bd07a9'
+        },
+        form: {
+            id: destination.id
+        }
+    };
+    axios
+        .request(international)
+        .then(function(response) {
+            console.log(response.data);
+            res.json(response.data)
+        })
+        .catch(function(error) {
+            console.error(error);
+            res.send(error)
+        });
+})
+
+router.post('/internasionalCost', (req, res) => {
+    const cost = req.body
+    const international = {
+        method: 'POST',
+        url: 'https://pro.rajaongkir.com/api/v2/internationalCost',
+        headers: {
+            key: 'b4f5bd013cd49cab7d2d46f815bd07a9',
+            'content-type': 'application/x-www-form-urlencoded'
+        },
+        form: {
+            origin: cost.origin,
+            destination: cost.destination,
+            weight: cost.weight,
+            courier: cost.courier
+        }
+    };
+    request(international, function(error, response, body) {
+        if (error) throw new Error(error);
+
+        console.log(body);
+        res.json(response.body)
+    });
+})
+
+router.get('/currency', (req, res) => {
+    const currency = {
+        method: 'GET',
+        url: 'https://pro.rajaongkir.com/api/currency',
+        headers: {
+            key: 'b4f5bd013cd49cab7d2d46f815bd07a9'
+        },
+    };
+    axios
+        .request(currency)
+        .then(function(response) {
+            console.log(response.data);
+            res.json(response.data)
+        })
+        .catch(function(error) {
+            console.error(error);
+            res.send(error)
+        });
+})
+
+router.post('/waybill', (req, res) => {
+    const track = req.body
+    const currency = {
+        method: 'POST',
+        url: 'https://pro.rajaongkir.com/api/waybill',
+        headers: {
+            key: 'b4f5bd013cd49cab7d2d46f815bd07a9',
+            'content-type': 'application/x-www-form-urlencoded'
+        },
+        form: {
+            waybill: track.waybill,
+            courier: track.courier
+        }
+    };
+    request(currency, function(error, response, body) {
+        if (error) throw new Error(error);
+
+        console.log(body);
+        res.json(response.body)
+    });
+})
+
 module.exports = router
-return router;
