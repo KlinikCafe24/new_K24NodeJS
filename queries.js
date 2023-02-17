@@ -1,5 +1,8 @@
 const crypto = require('crypto')
 const bcrypt = require('bcrypt')
+const key = ""
+const axios = require('axios')
+const otpGenerator = require('otp-generator')
 const environment = process.env.NODE_ENV || 'development';
 const configuration = require('./knex')[environment];
 const database = require('knex')(configuration);
@@ -136,6 +139,64 @@ const userPhotos = (request, response) => {
         response.status(404)
     }
 }
+
+const createOTP = (params, callback) => {
+    const otp = otpGenerator.generate(6, {
+        numeric: true,
+        alphabets: true,
+        upperCase: true,
+        specialChars: true
+    });
+    const ttl = 5 * 60 * 1000;
+    const expires = Date.now() + ttl;
+    const data = `${params.phone_number}.${otp}.${expires}`;
+    const hash = crypto.createHmac("sha256", key).update(data).digest("hex");
+    const fullHash = `${hash}.${expires}`;
+    const send = {
+        method: 'POST',
+        url: 'https://sendtalk-api.taptalk.io/api/v1/message/send_whatsapp',
+        headers: {
+            accept: 'application/json',
+            'content-type': 'application/json',
+            'API-Key': '977e9273aa133d2550255c0a14ebff7084e3a5cda4b77d1be1e109d7909051d2'
+        },
+        data: {
+            phone: `${params.phone_number}`,
+            messageType: 'otp',
+            body: `Hi, Thanks for your validation. Your OTP is ${otp}`
+        }
+    };
+
+    console.log(`OTP = ${otp}, Expires = ${expires}, Data = ${data}, Hash = ${hash}, FullHash = ${fullHash}`);
+
+    axios
+        .request(send)
+        .then(function(feedback) {
+            console.log(feedback.data);
+            if (feedback.data.data.success == true) {
+                console.log(`OTP has been send to ${params.phone_number}`);
+            } else {
+                console.log('Failed send OTP')
+            }
+        })
+        .catch(function(error) {
+            console.error(error);
+        });
+    // return callback(null, fullHash);
+}
+
+const verifyOTP = (params, callback) => {
+    let [hashValue, expires] = params.hash.split('.');
+    let now = Date.now();
+    if (now > parseInt(expires)) return callback("OTP Expired");
+    let newCalculateHash = crypto.createHmac("sha256", key).update(data).digest("hex");
+
+    if (newCalculateHash === hashValue) {
+        return callback(null, "Success");
+    } else {
+        return callback("Invalid OTP")
+    }
+}
 module.exports = {
     // getUser,
     // getUserById,
@@ -147,7 +208,9 @@ module.exports = {
     userPhotos,
     authenticate,
     findByToken,
-    findPhone
+    findPhone,
+    createOTP,
+    verifyOTP
     // updateProduct,
     // deleteProduct
 }
