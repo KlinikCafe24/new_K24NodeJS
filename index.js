@@ -7,6 +7,7 @@ const cors = require('cors');
 const RajaOngkir_apiRouter = require('./routes/rajaongkir_api')
 const Midtrans_apiRouter = require('./routes/midtrans_api')
 const Sendtalk_apiRouter = require('./routes/sendtalk_api')
+const Users_apiRouter = require('./routes/users_api')
     // import pool from "../K24/queries";
 
 router.use(cors())
@@ -20,10 +21,10 @@ router.use(
     })
 )
 
-router.post('/signup', db.signup)
-router.post('/signin', db.signin)
+
 router.use('/midtrans_api', Midtrans_apiRouter);
 router.use('/sendtalk_api', Sendtalk_apiRouter);
 router.use('/rajaongkir_api', RajaOngkir_apiRouter);
+router.use('/users_api', Users_apiRouter);
 
 module.exports = router;

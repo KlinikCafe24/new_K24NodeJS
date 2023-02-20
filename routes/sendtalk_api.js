@@ -9,9 +9,7 @@ const { error } = require('console')
 
 router.get('/validate_whatsapp/:phone_number', (req, res) => {
     const form = req.params
-    let phone
     db.findPhone(form).then(getPhone => {
-        phone = getPhone
         switch (getPhone.phone_status) {
             case false:
                 db.createOTP(form)
@@ -19,11 +17,6 @@ router.get('/validate_whatsapp/:phone_number', (req, res) => {
                 break;
             case true:
                 db.signin
-                    // res.redirect('/signin')
-                    // res.status(200).json({
-                    //     success: true,
-                    //     message: 'Silahkan masukkan Username & Password anda!'
-                    // })
                 break;
             default:
                 res.json({

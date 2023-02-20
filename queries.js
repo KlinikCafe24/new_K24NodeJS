@@ -7,6 +7,7 @@ const environment = process.env.NODE_ENV || 'development';
 const configuration = require('./knex')[environment];
 const database = require('knex')(configuration);
 
+
 const signup = (request, response) => {
     const user = request.body
     hashPassword(user.password)
@@ -36,10 +37,17 @@ const createUser = (user) => {
     const id = crypto.randomUUID();
     console.log(id);
     return database.raw(
-            "INSERT INTO directus_users(id,username,email,phone ,password_digest, token) VALUES (?, ?, ?, ?, ?) RETURNING id, username, token", [id, user.username, user.email, user.phone, user.password_digest, user.token]
+            "INSERT INTO directus_users(id,name,email,phone ,password_digest, token) VALUES (?, ?, ?, ?, ?, ?) RETURNING id,name,email,phone,password_digest, token", [id, user.name, user.email, user.phone_number, user.password_digest, user.token]
         )
         .then((data) => data.rows[0])
 }
+
+// const updateUser = (user) => {
+//     return database.raw(
+//             "UPDATE directus_users(first_name,last_name,name,email,phone,gender,born_date,address,kelurahan,kecamatan,kota,provinsi,password_digest) SET (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) WHERE token = " [user.first_name, user.last_name, user.name, user.email, user.phone, user.gender, user.born_date, user.address, user.kelurahan, user.kecamatan, user.kota, user.provinsi, user.password_digest, user.token]
+//         )
+//         .then((data) => data.rows[0])
+// }
 
 const createToken = () => {
     return new Promise((resolve, reject) => {
@@ -52,8 +60,8 @@ const createToken = () => {
 const signin = (request, response) => {
     const userReq = request.body
     let user
-    if (request.body.username) {
-        findUser(userReq)
+    if (request.body.email) {
+        findEmail(userReq)
             .then(foundUser => {
                 user = foundUser
                 return checkPassword(userReq.password, foundUser)
@@ -65,8 +73,8 @@ const signin = (request, response) => {
                 response.status(200).json(user)
             })
             .catch((err) => console.error(err))
-    } else if (request.body.email) {
-        findEmail(userReq)
+    } else if (request.body.phone_number) {
+        findPhone(userReq)
             .then(foundUser => {
                 user = foundUser
                 return checkPassword(userReq.password, foundUser)
@@ -81,10 +89,33 @@ const signin = (request, response) => {
     }
 }
 
-const findUser = (userReq) => {
-    return database.raw("SELECT * FROM directus_users WHERE username = ?", [userReq.username])
-        .then((data) => data.rows[0])
+const forgetPassword = (request, response) => {
+    const userReq = request.body
+    let user
+    if (request.body.email) {
+        findEmail(userReq)
+            .then(foundUser => {
+                user = foundUser
+                return forgetPassword_email(userReq.email, foundUser)
+            })
+            .then(email => updateUserPassword(email, user))
+            .catch((err) => console.error(err))
+    } else if (request.body.phone_number) {
+        findPhone(userReq)
+            .then(foundUser => {
+                user = foundUser
+                return forgetPassword_phone(userReq.phone_number, foundUser)
+            })
+            .then(password_digest => updateUserPassword(password_digest, user))
+            .catch((err) => console.error(err))
+    }
 }
+
+
+// const findUser = (userReq) => {
+//     return database.raw("SELECT * FROM directus_users WHERE name = ?", [userReq.name])
+//         .then((data) => data.rows[0])
+// }
 
 const findEmail = (userReq) => {
     return database.raw("SELECT * FROM directus_users WHERE email = ?", [userReq.email])
@@ -110,15 +141,56 @@ const checkPassword = (reqPassword, foundUser) => {
     )
 }
 
+const forgetPassword_phone = (req) => {
+    const restore = req.body
+    const send = {
+        method: 'POST',
+        url: 'https://sendtalk-api.taptalk.io/api/v1/message/send_whatsapp',
+        headers: {
+            accept: 'application/json',
+            'content-type': 'application/json',
+            'API-Key': '977e9273aa133d2550255c0a14ebff7084e3a5cda4b77d1be1e109d7909051d2'
+        },
+        data: {
+            phone: `${restore.phone_number}`,
+            messageType: 'otp',
+            body: `Hi, This is your link for recovery & reset password: `
+        }
+    };
+
+    axios
+        .request(send)
+        .then(function(feedback) {
+            console.log(feedback.data);
+            if (feedback.data.data.success == true) {
+                console.log(`OTP has been send to ${restore.phone_number}`);
+            } else {
+                console.log('Failed send OTP')
+            }
+        })
+        .catch(function(error) {
+            console.error(error);
+        });
+}
+
+const forgetPassword_email = (req) => {
+    const restore = req.body
+}
+
+const updateUserPassword = (password_digest, user) => {
+    return database.raw("UPDATE directus_users SET password_digest = ? WHERE id = ? RETURNING id, name, password_digest", [password_digest, user.id])
+        .then((data) => data.rows[0])
+}
+
 const updateUserToken = (token, user) => {
-    return database.raw("UPDATE directus_users SET token = ? WHERE id = ? RETURNING id, username, token", [token, user.id])
+    return database.raw("UPDATE directus_users SET token = ? WHERE id = ? RETURNING id, name, token", [token, user.id])
         .then((data) => data.rows[0])
 }
 
 const authenticate = (userReq) => {
     findByToken(userReq.token)
         .then((user) => {
-            if (user.username == userReq.username || user.email == userReq.email) {
+            if (user.name == userReq.name || user.email == userReq.email) {
                 return true
             } else {
                 return false
@@ -205,12 +277,14 @@ module.exports = {
     // checkAuth,
     signup,
     signin,
+    // updateUser,
     userPhotos,
     authenticate,
     findByToken,
     findPhone,
     createOTP,
-    verifyOTP
+    verifyOTP,
+    forgetPassword
     // updateProduct,
     // deleteProduct
 }

@@ -5,7 +5,10 @@ const port = 5000;
 const RajaOngkir_apiRouter = require('./routes/rajaongkir_api')
 const Midtrans_apiRouter = require('./routes/midtrans_api')
 const Sendtalk_apiRouter = require('./routes/sendtalk_api')
-
+const Users_apiRouter = require('./routes/users_api')
+const bodyparser = require("body-parser");
+app.use(bodyparser.urlencoded({ extended: false }));
+app.use(bodyparser.json());
 
 app.use(express.urlencoded({
     extended: true,
@@ -33,5 +36,6 @@ app.listen(port, () => {
 app.use('/midtrans_api', Midtrans_apiRouter);
 app.use('/sendtalk_api', Sendtalk_apiRouter);
 app.use('/rajaongkir_api', RajaOngkir_apiRouter);
+app.use('/users_api', Users_apiRouter);
 
 // module.exports = pool, port, Shipper_apiRouter, RajaOngkir_apiRouter, Midtrans_apiRouter, Sendtalk_apiRouter
