@@ -25,38 +25,6 @@ const signup = (request, response) => {
         .catch((err) => console.error(err))
 }
 
-const hashPassword = (password) => {
-    return new Promise((resolve, reject) =>
-        bcrypt.hash(password, 10, (err, hash) => {
-            err ? reject(err) : resolve(hash)
-        })
-    )
-}
-
-const createUser = (user) => {
-    const id = crypto.randomUUID();
-    console.log(id);
-    return database.raw(
-            "INSERT INTO directus_users(id,name,email,phone ,password_digest, token) VALUES (?, ?, ?, ?, ?, ?) RETURNING id,name,email,phone,password_digest, token", [id, user.name, user.email, user.phone_number, user.password_digest, user.token]
-        )
-        .then((data) => data.rows[0])
-}
-
-// const updateUser = (user) => {
-//     return database.raw(
-//             "UPDATE directus_users(first_name,last_name,name,email,phone,gender,born_date,address,kelurahan,kecamatan,kota,provinsi,password_digest) SET (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) WHERE token = " [user.first_name, user.last_name, user.name, user.email, user.phone, user.gender, user.born_date, user.address, user.kelurahan, user.kecamatan, user.kota, user.provinsi, user.password_digest, user.token]
-//         )
-//         .then((data) => data.rows[0])
-// }
-
-const createToken = () => {
-    return new Promise((resolve, reject) => {
-        crypto.randomBytes(16, (err, data) => {
-            err ? reject(err) : resolve(data.toString('base64'))
-        })
-    })
-}
-
 const signin = (request, response) => {
     const userReq = request.body
     let user
@@ -96,7 +64,7 @@ const forgetPassword = (request, response) => {
         findEmail(userReq)
             .then(foundUser => {
                 user = foundUser
-                return forgetPassword_email(userReq.email, foundUser)
+                return forgetPassword_email(userReq, foundUser)
             })
             .then(email => updateUserPassword(email, user))
             .catch((err) => console.error(err))
@@ -104,18 +72,63 @@ const forgetPassword = (request, response) => {
         findPhone(userReq)
             .then(foundUser => {
                 user = foundUser
-                return forgetPassword_phone(userReq.phone_number, foundUser)
+                return forgetPassword_phone(userReq, foundUser)
             })
             .then(password_digest => updateUserPassword(password_digest, user))
             .catch((err) => console.error(err))
     }
 }
 
+const editUser = (request, response) => {
+    const user_data = request.params
+    const user = request.body
+    findUser(user_data.name)
+        .then(() => updateUser(user))
+        .then(token => updateUserToken(token, user))
+        .then(password_digest => updateUserPassword(password_digest, user))
+        .then(user => {
+            response.status(200).json({ user })
+        })
+        .catch((err) => console.error(err))
+}
 
-// const findUser = (userReq) => {
-//     return database.raw("SELECT * FROM directus_users WHERE name = ?", [userReq.name])
-//         .then((data) => data.rows[0])
-// }
+const hashPassword = (password) => {
+    return new Promise((resolve, reject) =>
+        bcrypt.hash(password, 10, (err, hash) => {
+            err ? reject(err) : resolve(hash)
+        })
+    )
+}
+
+const createUser = (user) => {
+    const id = crypto.randomUUID();
+    console.log(id);
+    return database.raw(
+            "INSERT INTO directus_users(id,name,email,phone ,password_digest, token) VALUES (?, ?, ?, ?, ?, ?) RETURNING id,name,email,phone,password_digest, token", [id, user.name, user.email, user.phone_number, user.password_digest, user.token]
+        )
+        .then((data) => data.rows[0])
+}
+
+const updateUser = (user) => {
+    return database.raw(
+            "UPDATE directus_users(name,email,phone,gender,born_date,address,kelurahan,kecamatan,kota,provinsi,password_digest) SET (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) WHERE token = " [user.name, user.email, user.phone_number, user.gender, user.born_date, user.address, user.kelurahan, user.kecamatan, user.kota, user.provinsi, user.password_digest, user.token]
+        )
+        .then((data) => data.rows[0])
+}
+
+const createToken = () => {
+    return new Promise((resolve, reject) => {
+        crypto.randomBytes(16, (err, data) => {
+            err ? reject(err) : resolve(data.toString('base64'))
+        })
+    })
+}
+
+
+const findUser = (userReq) => {
+    return database.raw("SELECT * FROM directus_users WHERE name = ?", [userReq.name])
+        .then((data) => data.rows[0])
+}
 
 const findEmail = (userReq) => {
     return database.raw("SELECT * FROM directus_users WHERE email = ?", [userReq.email])
@@ -141,8 +154,7 @@ const checkPassword = (reqPassword, foundUser) => {
     )
 }
 
-const forgetPassword_phone = (req) => {
-    const restore = req.body
+const forgetPassword_phone = (userReq, foundUser) => {
     const send = {
         method: 'POST',
         url: 'https://sendtalk-api.taptalk.io/api/v1/message/send_whatsapp',
@@ -152,18 +164,19 @@ const forgetPassword_phone = (req) => {
             'API-Key': '977e9273aa133d2550255c0a14ebff7084e3a5cda4b77d1be1e109d7909051d2'
         },
         data: {
-            phone: `${restore.phone_number}`,
+            phone: `${userReq.phone_number}`,
             messageType: 'otp',
             body: `Hi, This is your link for recovery & reset password: `
         }
     };
+    console.log(userReq.phone_number)
 
     axios
         .request(send)
         .then(function(feedback) {
             console.log(feedback.data);
             if (feedback.data.data.success == true) {
-                console.log(`OTP has been send to ${restore.phone_number}`);
+                console.log(`OTP has been send to ${userReq.phone_number}`);
             } else {
                 console.log('Failed send OTP')
             }
@@ -277,14 +290,11 @@ module.exports = {
     // checkAuth,
     signup,
     signin,
-    // updateUser,
-    userPhotos,
-    authenticate,
-    findByToken,
+    editUser,
+    forgetPassword,
     findPhone,
     createOTP,
-    verifyOTP,
-    forgetPassword
+    verifyOTP
     // updateProduct,
     // deleteProduct
 }
