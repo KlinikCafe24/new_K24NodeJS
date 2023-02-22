@@ -71,6 +71,9 @@ const forgetPassword = (request, response) => {
     } else if (request.body.phone_number) {
         findPhone(userReq)
             .then(foundUser => {
+                return checkPhone(userReq, foundUser)
+            })
+            .then(foundUser => {
                 user = foundUser
                 return forgetPassword_phone(userReq, foundUser)
             })
@@ -149,6 +152,20 @@ const checkPassword = (reqPassword, foundUser) => {
                 resolve(response)
             } else {
                 console.log({ message: "Username or Password its Wrong" });
+            }
+        })
+    )
+}
+
+const checkPhone = (reqPhone, foundUser) => {
+    return new Promise((resolve, reject) =>
+        database.compare(reqPhone, foundUser, (err, response) => {
+            if (err) {
+                reject(err)
+            } else if (response) {
+                resolve(response)
+            } else {
+                console.log({ message: "Phone Number is not Register" });
             }
         })
     )
@@ -293,6 +310,7 @@ module.exports = {
     editUser,
     forgetPassword,
     findPhone,
+    checkPhone,
     createOTP,
     verifyOTP
     // updateProduct,
