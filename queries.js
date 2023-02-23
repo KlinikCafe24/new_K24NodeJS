@@ -6,6 +6,8 @@ const otpGenerator = require('otp-generator')
 const environment = process.env.NODE_ENV || 'development';
 const configuration = require('./knex')[environment];
 const database = require('knex')(configuration);
+// const email_node = require('./nodemailer')
+const nodemailer = require('nodemailer');
 
 
 const signup = (request, response) => {
@@ -59,38 +61,55 @@ const signin = (request, response) => {
 
 const forgetPassword = (request, response) => {
     const userReq = request.body
-    let user
+    let user_email, user_phone
     if (request.body.email) {
         findEmail(userReq)
             .then(foundUser => {
-                user = foundUser
-                return forgetPassword_email(userReq, foundUser)
+                user_email = foundUser
+                if (request.body.email == user_email.email) {
+                    console.log(`Recovery Password will be sent to your Email: ${request.body.email}`);
+                    return forgetPassword_email(userReq, foundUser)
+                } else {
+                    console.log("Email not Found");
+                    return request.body.email;
+                }
             })
-            .then(email => updateUserPassword(email, user))
+            // .then(email => updateUserPassword(email, user))
             .catch((err) => console.error(err))
     } else if (request.body.phone_number) {
         findPhone(userReq)
             .then(foundUser => {
-                return checkPhone(userReq, foundUser)
+                user_phone = foundUser
+                console.log(request.body.phone_number);
+                console.log(user_phone);
+                if (user_phone) {
+                    if (request.body.phone_number == user_phone.phone) {
+                        console.log(`Recovery Password will be sent to ${request.body.phone_number} in Whatsapp`);
+                        return forgetPassword_phone(userReq, foundUser)
+                    }
+                } else {
+                    console.log("Phone Number not Found");
+                    return request.body.phone_number;
+                }
             })
-            .then(foundUser => {
-                user = foundUser
-                return forgetPassword_phone(userReq, foundUser)
-            })
-            .then(password_digest => updateUserPassword(password_digest, user))
+            // .then(password_digest => updateUserPassword(password_digest, user))
             .catch((err) => console.error(err))
     }
 }
 
 const editUser = (request, response) => {
-    const user_data = request.params
-    const user = request.body
-    findUser(user_data.name)
-        .then(() => updateUser(user))
-        .then(token => updateUserToken(token, user))
-        .then(password_digest => updateUserPassword(password_digest, user))
-        .then(user => {
-            response.status(200).json({ user })
+    const userReq = request.body
+    let edit_user
+    findUser(userReq)
+        .then(foundUser => {
+            edit_user = foundUser
+            console.log(edit_user);
+        })
+        .then(() => updateUser(edit_user))
+        .then(token => updateUserToken(token, edit_user))
+        .then(password_digest => updateUserPassword(password_digest, edit_user))
+        .then(edit_user => {
+            response.status(200).json({ edit_user })
         })
         .catch((err) => console.error(err))
 }
@@ -114,7 +133,7 @@ const createUser = (user) => {
 
 const updateUser = (user) => {
     return database.raw(
-            "UPDATE directus_users(name,email,phone,gender,born_date,address,kelurahan,kecamatan,kota,provinsi,password_digest) SET (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) WHERE token = " [user.name, user.email, user.phone_number, user.gender, user.born_date, user.address, user.kelurahan, user.kecamatan, user.kota, user.provinsi, user.password_digest, user.token]
+            "UPDATE directus_users(name,email,phone,gender,born_date,address,kelurahan,kecamatan,kota,provinsi,password_digest) SET (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) WHERE id = ? RETURNING id,name,email,phone,token", [user.name, user.email, user.phone_number, user.gender, user.born_date, user.address, user.kelurahan, user.kecamatan, user.kota, user.provinsi, user.password_digest, user.token, user.id]
         )
         .then((data) => data.rows[0])
 }
@@ -159,7 +178,7 @@ const checkPassword = (reqPassword, foundUser) => {
 
 const checkPhone = (reqPhone, foundUser) => {
     return new Promise((resolve, reject) =>
-        database.compare(reqPhone, foundUser, (err, response) => {
+        Buffer.compare(reqPhone, foundUser, (err, response) => {
             if (err) {
                 reject(err)
             } else if (response) {
@@ -172,6 +191,7 @@ const checkPhone = (reqPhone, foundUser) => {
 }
 
 const forgetPassword_phone = (userReq, foundUser) => {
+    const link = "klinikcafe24.com"
     const send = {
         method: 'POST',
         url: 'https://sendtalk-api.taptalk.io/api/v1/message/send_whatsapp',
@@ -181,9 +201,9 @@ const forgetPassword_phone = (userReq, foundUser) => {
             'API-Key': '977e9273aa133d2550255c0a14ebff7084e3a5cda4b77d1be1e109d7909051d2'
         },
         data: {
-            phone: `${userReq.phone_number}`,
+            phone: userReq.phone_number,
             messageType: 'otp',
-            body: `Hi, This is your link for recovery & reset password: `
+            body: `Hi, This is your link for recovery & reset password: ` + link
         }
     };
     console.log(userReq.phone_number)
@@ -203,8 +223,25 @@ const forgetPassword_phone = (userReq, foundUser) => {
         });
 }
 
-const forgetPassword_email = (req) => {
-    const restore = req.body
+const forgetPassword_email = (userReq, foundUser) => {
+    const link = "klinikcafe24.com"
+    const transport = nodemailer.createTransport({
+        host: "mail.klinikcafe24.com",
+        port: 465,
+        auth: {
+            user: "visipentabersama@klinikcafe24.com",
+            pass: "ProjectWebsite100%"
+        },
+        secure: true
+    });
+
+    transport.sendMail({
+            from: "visipentabersama@klinikcafe24.com",
+            to: userReq.email,
+            subject: "Recovery Password",
+            text: "Hi, This is your link for recovery & reset password: " + link,
+        })
+        .then(console.log, console.error);
 }
 
 const updateUserPassword = (password_digest, user) => {
@@ -316,144 +353,3 @@ module.exports = {
     // updateProduct,
     // deleteProduct
 }
-
-// const config = { Authorization: "Bearer 6xi90t_us68NBlzdVRmjsWPaCqwCtBe1" }
-// const getUser = (req, res) => {
-//     axios.get('https://y1jeig5s.directus.app/items/user_data', { config }).then(function(response) {
-//             res.status(200).json({
-//                 status: 1,
-//                 data: response.data
-//             })
-//         })
-//         .catch(function(error) {
-//             res.status(404).json({
-//                 message: error.message
-//             })
-//         })
-// };
-
-
-// const getUserById = (req, res) => {
-//     const id = parseInt(req.params.id);
-//     axios.get('https://y1jeig5s.directus.app/items/user_data', $id = { id }, { config }).then(function(response) {
-//             res.status(200).json({
-//                 status: 1,
-//                 data: response.data
-//             })
-//         })
-//         .catch(function(error) {
-//             res.status(404).json({
-//                 message: error.message
-//             })
-//         })
-// }
-
-// const addUser = (req, res) => {
-//     const user = req.body
-//     axios.post('https://y1jeig5s.directus.app/items/user_data', {
-//             name: user.name,
-//             email: user.email,
-//             phone: user.phone,
-//             password: user.password
-//         }, { config }).then(function(response) {
-//             res.status(200).json({
-//                 status: 1,
-//                 data: response.data
-//             })
-//             res.json(response.data)
-//         })
-//         .catch(function(error) {
-//             res.status(404).json({
-//                 message: error.message
-//             })
-//             res.send(error)
-//         })
-// };
-
-
-
-
-// const createProduct = (request, response) => {
-//     const { firstname, lastname, origin } = request.body;
-//     pool.query('INSERT INTO Product (firstname, lastname, origin) VALUES ($1, $2, $3)', [firstname, lastname, origin], (error, results) => {
-//         if (error) {
-//             throw error
-//         }
-//         response.status(201).send("Student added");
-//     })
-// }
-
-// const updateProduct = (request, response) => {
-//     const id = parseInt(request.params.id);
-//     var responseReturn = new ResponseClass();
-//     try {
-//         const { firstname, lastname, origin } = request.body;
-//         pool.query('UPDATE Product SET firstname = $1, lastname = $2, origin = $3 WHERE id = $4', [firstname, lastname, origin, id], (error, results) => {
-//             if (error) {
-//                 throw error
-//             }
-
-//             responseReturn.status = true;
-//             responseReturn.code = 200;
-//             responseReturn.message = "User modification successed";
-//             responseReturn.data = null;
-//             response.status(200).send(responseReturn);
-//         })
-//     } catch (error) {
-//         responseReturn.status = false;
-//         responseReturn.code = 500;
-//         responseReturn.message = error.message;
-//         responseReturn.data = null
-//         response.status(500).json(responseReturn);
-//     }
-// }
-
-// const deleteProduct = (request, response) => {
-//     const id = parseInt(request.params.id)
-//     pool.query('DELETE FROM Product WHERE id = $1', [id], (error, results) => {
-//         if (error) {
-//             throw error
-//         }
-//         response.status(201).send("Student deleted");
-//     })
-// }
-
-// const query = `SELECT * FROM public.directus_users`;
-// const authLogin = (req, res) => {
-//     const username = req.body.username;
-//     const password = crypto.createHmac("sha256", req.body.password).digest("hex");
-//     if(username && password)
-//     {
-//         pool.connect((err) => {
-//             if(err) throw err;
-//             pool.query(query, (req, res) => {
-//                 if(res)
-//                 {
-//                     res.rows.forEach((element, req) => {
-//                         if (username === element.username && password === element.password) {
-//                             req.session.id = element.id;
-//                             req.session.username = element.username;
-//                         } 
-
-//                     });
-//                 }
-//                 else{
-//                     console.log("No Response Data not Found");
-//                 }
-//             });
-//         })
-//     }
-//     else{
-//         return res
-//             .status(401)
-//             .send({message : "Username or Password Null"})
-//     }
-// }
-
-// const checkAuth = (req, res, next) => {
-//     if (!req.session.id) {
-//         res.send('You are not authorized to view this page');
-//     } else {
-//         next();
-//     }
-// }

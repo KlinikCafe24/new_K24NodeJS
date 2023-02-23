@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const port = 5000;
+const port = 3002;
 // const Shipper_apiRouter = require('./routes/shipper_api')
 const RajaOngkir_apiRouter = require('./routes/rajaongkir_api')
 const Midtrans_apiRouter = require('./routes/midtrans_api')
