@@ -4,7 +4,6 @@ const port = 3002;
 const Shipper_apiRouter = require('./routes/shipper_api')
 const RajaOngkir_apiRouter = require('./routes/rajaongkir_api')
 const Midtrans_apiRouter = require('./routes/midtrans_api')
-const Sendtalk_apiRouter = require('./routes/sendtalk_api')
 const Users_apiRouter = require('./routes/users_api')
 const Xendit_apiRouter = require('./routes/xendit_api')
 const Product_apiRouter = require('./routes/product_api')
@@ -48,7 +47,6 @@ app.listen(port, () => {
 
 app.use('/shipper_api', Shipper_apiRouter);
 app.use('/midtrans_api', Midtrans_apiRouter);
-app.use('/sendtalk_api', Sendtalk_apiRouter);
 app.use('/rajaongkir_api', RajaOngkir_apiRouter);
 app.use('/users_api', Users_apiRouter);
 app.use('/xendit_api', Xendit_apiRouter);

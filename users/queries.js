@@ -6,7 +6,7 @@ const key = ""
 const axios = require('axios')
 const otpGenerator = require('otp-generator')
 const environment = process.env.NODE_ENV || 'production';
-const configuration = require('./knex')[environment];
+const configuration = require('../knex')[environment];
 const database = require('knex')(configuration);
 const bodyparser = require("body-parser");
 const { MailtrapClient } = require("mailtrap");
@@ -394,6 +394,44 @@ const Confirmation_email = (userREG) => {
         .then(console.log, console.error)
 }
 
+const validateOTP_email = (request, response) => {
+    const userREG = request.body
+    const getParamsEmail = request.params
+    findEmail(getParamsEmail)
+        .then(foundUser => {
+            user = foundUser
+            console.log(user);
+        })
+        .then(() => findHashByEmail(getParamsEmail))
+        .then(hash => {
+            user_hash = hash
+            console.log(user_hash.hash_otp)
+            console.log(userREG.otp);
+            if (user_hash) {
+                bcrypt.compare(userREG.otp, user_hash.hash_otp)
+                    .then(result => {
+                        console.log(result);
+                        if (result) {
+                            console.log("OTP Matched");
+                            return response.json({
+                                "message": "OTP Matched"
+                            }).status(200);
+                        } else {
+                            console.log("OTP is no Valid/Match");
+                            return response.json({
+                                "message": "OTP is no Valid/Match"
+                            }).status(404);
+                        }
+                    })
+                    .catch((err) => console.error(err))
+                    .catch((err) => response.status(500).json({ error: err.message }))
+            } else {
+                console.log("OTP is not Provided");
+            }
+        })
+        .catch((err) => console.error(err))
+        .catch((err) => response.status(500).json({ error: err.message }))
+}
 const verifyOTP_email = (request, response) => {
     const userREG = request.body
     const getParamsEmail = request.params
@@ -700,5 +738,6 @@ module.exports = {
     createOTP,
     hashingOTP,
     verifyOTP_email,
-    verifyOTP_phone
+    verifyOTP_phone,
+    validateOTP_email
 }
