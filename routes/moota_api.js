@@ -18,5 +18,8 @@ router.post('/delete_bank/:bank_id/destroy', moota.delete_bank)
 
 // Mutation API
 router.post('/refresh_mutation', moota.refresh_mutation)
+router.get('/list_mutation/:type/:bank/:start_date/:end_date/:tag/:page/:per_page', moota.list_mutation)
+router.post('/dummy_mutation/:bank_id', moota.create_dummy)
+router.post('/note_mutation/:mutation_id', moota.note_mutation)
 
 module.exports = router

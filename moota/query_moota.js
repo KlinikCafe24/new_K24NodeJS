@@ -281,7 +281,7 @@ function delete_bank(req, res) {
 // Mutation Start
 function refresh_mutation(req, res) {
     const getParam = req.params
-    const bank = {
+    const mutation = {
         method: 'POST',
         url: 'https://private-anon-2e98711558-mootaapiv2.apiary-mock.com/api/v2/bank/' + getParam.bank_id + '/refresh',
         headers: {
@@ -291,7 +291,87 @@ function refresh_mutation(req, res) {
         },
     }
     axios
-        .request(bank)
+        .request(mutation)
+        .then(function(response) {
+            console.log(response.data)
+            res.status(200).json(response.data)
+        })
+        .catch(function(error) {
+            console.log(error)
+            res.status(500).json(error)
+        })
+}
+
+function list_mutation(req, res) {
+    const getParam = req.params
+    const mutation = {
+        method: 'POST',
+        url: 'https://private-anon-2e98711558-mootaapiv2.apiary-mock.com/api/v2/mutation/' + getParam.type + getParam.bank + getParam.start_date + getParam.end_date + getParam.tag + getParam.page + getParam.per_page,
+        headers: {
+            'Location': 'api/v2/mutation/' + getParam.type + getParam.bank + getParam.start_date + getParam.end_date + getParam.tag + getParam.page + getParam.per_page,
+            'Accept': 'application/json',
+            'Authorization': moota.Authorization
+        },
+    }
+    axios
+        .request(mutation)
+        .then(function(response) {
+            console.log(response.data)
+            res.status(200).json(response.data)
+        })
+        .catch(function(error) {
+            console.log(error)
+            res.status(500).json(error)
+        })
+}
+
+function create_dummy(req, res) {
+    const mutan = req.body
+    const getParam = req.params
+    const mutation = {
+        method: 'POST',
+        url: 'https://private-anon-2e98711558-mootaapiv2.apiary-mock.com/api/v2/mutation/store/' + getParam.bank_id,
+        headers: {
+            'Location': 'api/v2/mutation/store/' + getParam.bank_id,
+            'Accept': 'application/json',
+            'Authorization': moota.Authorization
+        },
+        data: {
+            note: mutan.note
+        }
+    }
+    axios
+        .request(mutation)
+        .then(function(response) {
+            console.log(response.data)
+            res.status(200).json(response.data)
+        })
+        .catch(function(error) {
+            console.log(error)
+            res.status(500).json(error)
+        })
+}
+
+function note_mutation(req, res) {
+    const mutan = req.body
+    const getParam = req.params
+    const mutation = {
+        method: 'POST',
+        url: 'https://private-anon-2e98711558-mootaapiv2.apiary-mock.com/api/v2/mutation/' + getParam.mutation_id + '/note',
+        headers: {
+            'Location': 'api/v2/mutation/' + getParam.mutation_id + '/note',
+            'Accept': 'application/json',
+            'Authorization': moota.Authorization
+        },
+        data: {
+            date: mutan.date,
+            note: mutan.note,
+            amount: mutan.amount,
+            type: mutan.type
+        }
+    }
+    axios
+        .request(mutation)
         .then(function(response) {
             console.log(response.data)
             res.status(200).json(response.data)
@@ -317,5 +397,7 @@ module.exports = {
     update_bank,
     delete_bank,
     refresh_mutation,
-
+    list_mutation,
+    create_dummy,
+    note_mutation
 }
