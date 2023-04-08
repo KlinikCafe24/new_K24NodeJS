@@ -1,0 +1,15 @@
+
+version: '2'
+services:
+  web:
+    build: .
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: process.env.DB_URL
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: klinikcafe24
+      POSTGRES_DB: k24_visipenta
+
