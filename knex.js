@@ -1,7 +1,8 @@
+require('dotenv').config();
 module.exports = {
     // development: {
     //     client: 'pg',
-    //     connection: 'postgres://postgres:123456@127.0.0.1:5432/directus_k24',
+    //     connection: 'postgres://klinikcafe24:ProjectWebsite100%@151.106.120.34:5434/k24_visipenta',
     //     migrations: {
     //         directory: './db/migrations'
     //     },

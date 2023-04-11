@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+const hostname = "127.0.0.1"
 const port = 3002;
 const Shipper_apiRouter = require('./routes/shipper_api')
 const RajaOngkir_apiRouter = require('./routes/rajaongkir_api')
@@ -23,8 +24,6 @@ const {
     DB_DATABASE,
     DB_PASSWORD,
     DB_PORT,
-    // SECRET_KEY,
-    // XENDIT_URL
 } = process.env;
 
 const { Pool } = require("pg");
@@ -42,7 +41,7 @@ pool.connect((err) => {
 });
 
 app.listen(port, () => {
-    console.log("Server is running on " + port);
+    console.log(`Server is running on http://${hostname}:${port}`);
 });
 
 app.use('/shipper_api', Shipper_apiRouter);

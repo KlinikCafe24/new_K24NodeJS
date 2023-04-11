@@ -10,7 +10,6 @@ const configuration = require('../knex')[environment];
 const database = require('knex')(configuration);
 const bodyparser = require("body-parser");
 const { MailtrapClient } = require("mailtrap");
-const validator = require('validator')
 require('dotenv').config();
 const {
     MAILTRAP_TOKEN,
@@ -235,9 +234,7 @@ const editUser = (request, response) => {
         .then(foundUser => {
             edit_user = foundUser
             if (edit_user) {
-                createToken()
-                    .then(token => updateUserToken(token, edit_user))
-                    .then(() => updateUser(request, edit_user))
+                updateUser(request, edit_user)
                     .then(edit_user => {
                         console.log(edit_user);
                         response.status(200).json({ edit_user })
@@ -322,7 +319,8 @@ const sendOTP_email = (userREG) => {
         .then(foundUser => {
             user = foundUser
             console.log(user);
-        }).then(() => hashingOTP(otp))
+        })
+        .then(() => hashingOTP(otp))
         .then(hash => hashOTP(user, hash))
         .then(() => console.log("OTP Hashing has been success!"))
         .catch((err) => console.error(err))
@@ -367,9 +365,6 @@ const sendOTP_phone = (userREG) => {
                     .then(() => console.log("OTP Hashing has been success!"))
                     .catch((err) => console.error(err))
                     .catch((err) => response.status(500).json({ error: err.message }))
-                    .catch(function(error) {
-                        console.error(error);
-                    });
             } else {
                 console.log('Hashing OTP has been cancel')
             }
@@ -462,7 +457,7 @@ const verifyOTP_email = (request, response) => {
                                 }).status(200);
                             }
                         } else {
-                            console.log(err.message);
+                            console.log("Valid OTP Failed");
                             return response.json({
                                 "message": "Valid OTP Failed"
                             }).status(404);
