@@ -14,9 +14,30 @@ app.use(express.urlencoded({
 }));
 
 // Product CRUD Start
+function getAll_product(req, res) {
+    findAllproduct()
+        .then(foundProduct => {
+            console.log(foundProduct)
+            res.status(200).json(foundProduct)
+        })
+        .catch((err) => console.error(err))
+        .catch((err) => res.status(500).json({ error: err.message }))
+}
+
 function get_product(req, res) {
     const getparams = req.params
     findproduct(getparams)
+        .then(foundProduct => {
+            console.log(foundProduct)
+            res.status(200).json(foundProduct)
+        })
+        .catch((err) => console.error(err))
+        .catch((err) => res.status(500).json({ error: err.message }))
+}
+
+function get_productbyCategory(req, res) {
+    const getparams = req.params
+    findproduct_category(getparams)
         .then(foundProduct => {
             console.log(foundProduct)
             res.status(200).json(foundProduct)
@@ -82,10 +103,10 @@ function delete_product(req, res) {
 
 // Create Function Start
 const createProduct = (product) => {
-    const id = crypto.randomUUID();
+    const id = "Product-" + crypto.randomUUID();
     console.log(id);
     return database.raw(
-            "INSERT INTO Product(id,product_name,product_desc,price ,old_price, rating,sold, brand, product_size,machine_name,machine_size) VALUES (?, ?, ?, ?, ?, ?, ?, ? , ? , ? , ? , ?) RETURNING id,product_name,product_desc,price ,old_price, brand, product_size,machine_name,machine_size", [id, product.name, product.desc, product.price, product.old_price, product.rating, product.sold, product.brand, product.product_size, product.machine_name, product.machine_model])
+        "INSERT INTO Product(id,product_name,product_desc,product_size, product_category, price ,brand, machine_name,machine_model) VALUES (?, ?, ?, ?, ?, ?, ?, ? , ?) RETURNING id,product_name,product_desc,product_size, product_category, price, brand, machine_name,machine_model", [id, product.product_name, product.product_desc, product.product_size, product.product_category, product.price, product.brand, product.machine_name, product.machine_model])
         .then((data) => data.rows[0])
 }
 
@@ -96,8 +117,8 @@ const updateProduct = (req) => {
     const getparams = req.params
     const product = req.body
     return database.raw(
-            "UPDATE Product SET product_name = ?,product_desc = ?,price = ?, old_price = ?,rating = ?,sold = ?,brand = ?,product_size = ?, machine_name = ?, machine_model = ? WHERE id = ? RETURNING id,product_name,product_desc,price ,old_price, brand, product_size,machine_name,machine_size", [product.name, product.desc, product.price, product.old_price, product.rating, product.sold, product.brand, product.product_size, product.machine_name, product.machine_model, getparams.id]
-        )
+        "UPDATE Product SET product_name = ?,product_desc = ?,product_size = ?, product_category = ?,price = ?,brand = ?,machine_name = ?,machine_model = ? WHERE id = ? RETURNING id,product_name,product_desc,product_size, product_category, price, brand, machine_name,machine_model", [product.product_name, product.product_desc, product.product_size, product.product_category, product.price, product.brand, product.machine_name, product.machine_model, getparams.id]
+    )
         .then((data) => data.rows[0])
 }
 
@@ -106,23 +127,35 @@ const updateProduct = (req) => {
 // Delete Function Start
 const deleteProduct = (getparams) => {
     return database.raw(
-            "DELETE FROM Product where id = ?" [getparams.id]
-        )
+        "DELETE FROM Product where id = ?"[getparams.id]
+    )
         .then((data) => data.rows[0])
 }
 
 // Delete Function End
 
 // Find Function Start
+const findAllproduct = () => {
+    return database.raw("SELECT * FROM Product ORDER BY product_category, product_name ASC")
+        .then((data) => data.rows)
+}
+
 const findproduct = (getparams) => {
     return database.raw("SELECT * FROM Product WHERE id = ?", [getparams.id])
         .then((data) => data.rows[0])
 }
 
+const findproduct_category = (getparams) => {
+    return database.raw("SELECT * FROM Product WHERE product_category = ? ORDER BY product_name ASC", [getparams.product_category])
+        .then((data) => data.rows)
+}
+
 // Find Function End
 
 module.exports = {
+    getAll_product,
     get_product,
+    get_productbyCategory,
     create_product,
     update_product,
     delete_product

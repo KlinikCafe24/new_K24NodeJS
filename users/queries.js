@@ -38,7 +38,7 @@ const signup = (request, response) => {
     let user
     if (userREG.email && userREG.phone_number) {
         (findEmail(userREG) && findPhone(userREG))
-        .then(foundUser => {
+            .then(foundUser => {
                 user = foundUser
                 if (user == undefined) {
                     const otp = createOTP();
@@ -266,17 +266,17 @@ const forgetPassword_phone = (userREG, response) => {
 
     axios
         .request(send)
-        .then(function(feedback) {
+        .then(function (feedback) {
             console.log(feedback.data)
             if (feedback.data.data.success == true) {
                 console.log(`OTP has been send to ${userREG.phone_number}`)
-                    // foundUser.status(200).json(feedback.data)
+                // foundUser.status(200).json(feedback.data)
             } else {
                 console.log('Failed send OTP')
-                    // foundUser.status(500).json({ error: err.message })
+                // foundUser.status(500).json({ error: err.message })
             }
         })
-        .catch(function(error) {
+        .catch(function (error) {
             console.error(error);
         });
 }
@@ -300,9 +300,8 @@ const forgetPassword_email = (userREG, response) => {
 
 }
 
-const sendOTP_email = (userREG) => {
+const sendOTP_email = (userREG, otp) => {
     const RECIPIENT_EMAIL = userREG.email;
-    const otp = createOTP()
     const client = new MailtrapClient({ token: MAILTRAP_TOKEN });
 
     const sender = { name: "PT Visi Penta Bersama", email: MAILTRAP_SENDER };
@@ -327,8 +326,7 @@ const sendOTP_email = (userREG) => {
         .catch((err) => response.status(500).json({ error: err.message }))
 }
 
-const sendOTP_phone = (userREG) => {
-    const otp = createOTP()
+const sendOTP_phone = (userREG, otp) => {
     const send = {
         method: 'POST',
         url: URL_WA,
@@ -346,7 +344,7 @@ const sendOTP_phone = (userREG) => {
 
     axios
         .request(send)
-        .then(function(feedback) {
+        .then(function (feedback) {
             console.log(feedback.data);
             if (feedback.data.data.success == true) {
                 console.log(`OTP has been send to ${userREG.phone_number}`);
@@ -355,7 +353,9 @@ const sendOTP_phone = (userREG) => {
             }
         })
         .then(feedback => {
-            if (feedback.data.data.success == true) {
+            if (feedback == undefined) {
+                console.log('Hashing OTP has been cancel')
+            } else if (feedback.data.data.success == true) {
                 findPhone(userREG)
                     .then(foundUser => {
                         user = foundUser
@@ -365,8 +365,6 @@ const sendOTP_phone = (userREG) => {
                     .then(() => console.log("OTP Hashing has been success!"))
                     .catch((err) => console.error(err))
                     .catch((err) => response.status(500).json({ error: err.message }))
-            } else {
-                console.log('Hashing OTP has been cancel')
             }
         })
 
@@ -560,15 +558,16 @@ const createUser = (user) => {
     const id = crypto.randomUUID();
     console.log(id);
     return database.raw(
-            "INSERT INTO directus_users(id,name,email,phone ,password_digest, token) VALUES (?, ?, ?, ?, ?, ?) RETURNING id,name,email,phone,password_digest, token", [id, user.name, user.email, user.phone_number, user.password_digest, user.token]
-        )
+        "INSERT INTO directus_users(id,name,email,phone ,password_digest, token) VALUES (?, ?, ?, ?, ?, ?) RETURNING id,name,email,phone,password_digest, token", [id, user.name, user.email, user.phone_number, user.password_digest, user.token]
+    )
         .then((data) => data.rows[0])
 }
 
 const createOTP = () => {
     const otp = otpGenerator.generate(6, {
         upperCaseAlphabets: false,
-        specialChars: false
+        specialChars: false,
+        lowerCaseAlphabets: false
     })
     console.log(otp)
     return otp
@@ -589,8 +588,8 @@ const updateUser = (request) => {
     const getparams = request.params
     const user = request.body
     return database.raw(
-            "UPDATE directus_users SET name = ?,gender = ?,born_date = ?,address = ?,kelurahan = ?,kecamatan = ?,kota = ?,provinsi = ? WHERE id = ? RETURNING id,name,email,phone,gender,born_date,address,kelurahan,kecamatan,kota,provinsi,token", [user.name, user.gender, user.born_date, user.address, user.kelurahan, user.kecamatan, user.kota, user.provinsi, getparams.id]
-        )
+        "UPDATE directus_users SET name = ?,gender = ?,born_date = ?,address = ?,kelurahan = ?,kecamatan = ?,kota = ?,provinsi = ? WHERE id = ? RETURNING id,name,email,phone,gender,born_date,address,kelurahan,kecamatan,kota,provinsi,token", [user.name, user.gender, user.born_date, user.address, user.kelurahan, user.kecamatan, user.kota, user.provinsi, getparams.id]
+    )
         .then((data) => data.rows[0])
 }
 
@@ -606,8 +605,8 @@ const updateUserToken = (token, edit_user) => {
 
 const hashOTP = (user, hash) => {
     return database.raw(
-            "UPDATE directus_users SET hash_otp = ? where id = ? RETURNING hash_otp", [hash, user.id]
-        )
+        "UPDATE directus_users SET hash_otp = ? where id = ? RETURNING hash_otp", [hash, user.id]
+    )
         .then((data) => data.rows[0])
 }
 
